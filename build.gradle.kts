@@ -18,6 +18,10 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
+    // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
+    // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+    implementation("com.zaxxer:HikariCP:4.0.3")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
