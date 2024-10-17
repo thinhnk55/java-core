@@ -22,6 +22,12 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     implementation("com.zaxxer:HikariCP:4.0.3")
+    // https://mvnrepository.com/artifact/io.vertx/vertx-web
+    implementation("io.vertx:vertx-web:4.5.10")
+    // https://mvnrepository.com/artifact/io.vertx/vertx-core
+    implementation("io.vertx:vertx-core:4.5.10")
+    // https://mvnrepository.com/artifact/io.vertx/vertx-web-client
+    implementation("io.vertx:vertx-web-client:4.5.10")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
