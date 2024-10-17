@@ -13,7 +13,6 @@ public class DebugLogger {
     /**
      * A static logger instance configured with the name "debug".
      * This logger can be used across the application to log debug messages.
-     *
      * Example Usage:
      * DebugLogger.logger.debug("Debug message");
      * DebugLogger.logger.error("An error occurred", exception);

@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 
 public class VertxServerTest {
-    private static Vertx vertx; // Vertx instance for tests
     private static WebClient client; // Web client to make API calls
 
     /**
@@ -49,8 +48,8 @@ public class VertxServerTest {
         CompletableFuture<String> completableFuture = future.toCompletionStage().toCompletableFuture();
         completableFuture.get(5, TimeUnit.SECONDS);  // Block the current thread until the server starts
 
-        // Initialize a new Vert.x instance
-        vertx = Vertx.vertx();
+        // Vertx instance for tests
+        Vertx vertx = Vertx.vertx();
 
         // Retrieve the HTTP port from the Vert.x server configuration
         int http_port = VertxServer.getInstance().config.get("http_port").getAsInt();

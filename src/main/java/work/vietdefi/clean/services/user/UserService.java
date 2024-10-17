@@ -11,10 +11,10 @@ import work.vietdefi.sql.ISQLJavaBridge;
 public class UserService implements IUserService {
 
     // A bridge to interact with the underlying SQL database.
-    private ISQLJavaBridge bridge;
+    private final ISQLJavaBridge bridge;
 
     // The name of the table where user data is stored.
-    private String table;
+    private final String table;
 
     /**
      * Constructs a new UserService with the given SQL bridge and table name.
