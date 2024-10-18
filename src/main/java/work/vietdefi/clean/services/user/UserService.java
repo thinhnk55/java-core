@@ -1,7 +1,13 @@
 package work.vietdefi.clean.services.user;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import work.vietdefi.clean.services.common.SimpleResponse;
 import work.vietdefi.sql.ISQLJavaBridge;
+import work.vietdefi.util.log.DebugLogger;
+
+import java.math.BigInteger;
 
 /**
  * UserService is an implementation of the IUserService interface.
@@ -9,12 +15,14 @@ import work.vietdefi.sql.ISQLJavaBridge;
  * and interacts with the database via the ISQLJavaBridge.
  */
 public class UserService implements IUserService {
+    //Token expired in 30 days
+    public static final long TOKEN_EXPIRED = 30*24*3600*1000L;
 
     // A bridge to interact with the underlying SQL database.
     private final ISQLJavaBridge bridge;
 
     // The name of the table where user data is stored.
-    private final String table;
+    public final String table;
 
     /**
      * Constructs a new UserService with the given SQL bridge and table name.
@@ -68,8 +76,36 @@ public class UserService implements IUserService {
      */
     @Override
     public JsonObject register(String username, String password) {
-        // To be implemented.
-        return null;
+        try {
+            String query = new StringBuilder()
+                    .append("SELECT user_id FROM ")
+                    .append(table)
+                    .append(" WHERE username = ?").toString();
+            JsonObject data = bridge.queryOne(query, username);
+            if(data != null){
+                return SimpleResponse.createResponse(10);
+            }
+            String  hashedPassword = DigestUtils.sha512Hex(password);
+            String token = RandomStringUtils.randomAlphanumeric(8);
+            long token_expired = System.currentTimeMillis() + TOKEN_EXPIRED;
+            query = new StringBuilder()
+                    .append("INSERT INTO ")
+                    .append(table)
+                    .append(" (username, password, token, token_expired)")
+                    .append(" VALUE (?,?,?,?)")
+                    .toString();
+            BigInteger generatedKey = (BigInteger) bridge.insert(query, username, hashedPassword, token, token_expired);
+            long id = generatedKey.longValue();
+            data = new JsonObject();
+            data.addProperty("user_id", id);
+            data.addProperty("username", username);
+            data.addProperty("token", token);
+            data.addProperty("token_expired", token_expired);
+            return SimpleResponse.createResponse(0, data);
+        }catch (Exception e){
+            DebugLogger.logger.error("", e);
+            return SimpleResponse.createResponse(1);
+        }
     }
 
     /**
@@ -81,8 +117,42 @@ public class UserService implements IUserService {
      */
     @Override
     public JsonObject login(String username, String password) {
-        // To be implemented.
-        return null;
+        try {
+            String query = new StringBuilder()
+                    .append("SELECT * FROM ")
+                    .append(table)
+                    .append(" WHERE username = ?").toString();
+            JsonObject data = bridge.queryOne(query, username);
+            if (data == null) {
+                return SimpleResponse.createResponse(10);
+            }
+            String storePassword = data.get("password").getAsString();
+            String  hashedPassword = DigestUtils.sha512Hex(password);
+            if(!storePassword.equals(hashedPassword)){
+                return SimpleResponse.createResponse(11);
+            }
+            long token_expired = data.get("token_expired").getAsLong();
+            long now = System.currentTimeMillis();
+            if(now > token_expired) {
+                query = new StringBuilder()
+                        .append("UPDATE TABLE ")
+                        .append(table)
+                        .append(" SET token = ?, token_expired = ?")
+                        .append(" WHERE user_id = ?")
+                        .toString();
+                String token = RandomStringUtils.randomAlphanumeric(8);
+                token_expired = now + TOKEN_EXPIRED;
+                long user_id = data.get("user_id").getAsLong();
+                bridge.update(query, token, token_expired, user_id);
+                data.addProperty("token", token);
+                data.addProperty("token_expired", token_expired);
+            }
+            data.remove("password");
+            return SimpleResponse.createResponse(0, data);
+        }catch (Exception e){
+            DebugLogger.logger.error("", e);
+            return SimpleResponse.createResponse(1);
+        }
     }
 
     /**
@@ -93,7 +163,44 @@ public class UserService implements IUserService {
      */
     @Override
     public JsonObject authorization(String token) {
-        // To be implemented.
-        return null;
+        try{
+            String query = new StringBuilder("SELECT * FROM ")
+                    .append(table)
+                    .append(" WHERE token = ?")
+                    .toString();
+            JsonObject data = bridge.queryOne(query, token);
+            if(data == null){
+                return SimpleResponse.createResponse(10);
+            }
+            long token_expired = data.get("token_expired").getAsLong();
+            long now = System.currentTimeMillis();
+            if(token_expired < now){
+                return SimpleResponse.createResponse(11, data);
+            }
+            data.remove("password");
+            return SimpleResponse.createResponse(0, data);
+        }catch (Exception e){
+            DebugLogger.logger.error("", e);
+            return SimpleResponse.createResponse(1);
+        }
+    }
+
+    @Override
+    public JsonObject get(long user_id) {
+        try{
+            String query = new StringBuilder("SELECT * FROM ")
+                    .append(table)
+                    .append(" WHERE user_id = ?")
+                    .toString();
+            JsonObject data = bridge.queryOne(query, user_id);
+            if(data == null){
+                return SimpleResponse.createResponse(10);
+            }
+            data.remove("password");
+            return SimpleResponse.createResponse(0, data);
+        }catch (Exception e){
+            DebugLogger.logger.error("", e);
+            return SimpleResponse.createResponse(1);
+        }
     }
 }
