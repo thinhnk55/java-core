@@ -51,23 +51,18 @@ public class TestHandler {
      */
     public static void postMethod(RoutingContext routingContext) {
         try {
-            try {
-                // Retrieve the request body as a string
-                String body = routingContext.body().asString();
 
-                // Convert the body string into a JSON object using Gson
-                JsonObject json = GsonUtil.gsonConverter.toJsonElement(body).getAsJsonObject();
+            // Retrieve the request body as a string
+            String body = routingContext.body().asString();
 
-                // Wrap the JSON object in a success response (e = 0)
-                JsonObject response = SimpleResponse.createResponse(0, json);
+            // Convert the body string into a JSON object using Gson
+            JsonObject json = GsonUtil.gsonConverter.toJsonElement(body).getAsJsonObject();
 
-                // Send the response to the client
-                routingContext.response().end(response.toString());
-            } catch (Exception e) {
-                // Log the error and send a failure response (e = 1)
-                DebugLogger.logger.error("", e);
-                routingContext.response().end(SimpleResponse.createResponse(1).toString());
-            }
+            // Wrap the JSON object in a success response (e = 0)
+            JsonObject response = SimpleResponse.createResponse(0, json);
+
+            // Send the response to the client
+            routingContext.response().end(response.toString());
         } catch (Exception e) {
             // Log the error and send a failure response (e = 1)
             DebugLogger.logger.error("", e);
