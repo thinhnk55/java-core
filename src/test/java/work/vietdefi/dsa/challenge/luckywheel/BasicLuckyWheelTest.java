@@ -1,4 +1,4 @@
-package work.vietdefi.dsa.sort;
+package work.vietdefi.dsa.challenge.luckywheel;
 
 import org.junit.jupiter.api.Test;
 import work.vietdefi.challenge.luckywheel.BasicLuckyWheel;
